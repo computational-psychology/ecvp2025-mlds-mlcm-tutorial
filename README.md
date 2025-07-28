@@ -2,3 +2,13 @@
 Guillermo Aguilar
 
 Tutorial at the ECVP 2025 (Sun 24. August 2025, 13:30-16:00)
+
+## Abstract
+Maximum Likelihood Difference Scaling (MLDS) and Maximum Likelihood Conjoint Measurement (MLCM) are two methods used to estimate perceptual scales (Knoblauch & Maloney, 2012). These scales reflect stimulus appearance and characterize the mapping of stimulus dimensions to a perceptual dimension of interest. They can also serve as a basis for comparing computational models of the visual system. In this hands-on tutorial, you will learn how to design a typical MLDS/MLCM experiment and estimate scales using the collected data (in the R programming language). We will also cover the underlying assumptions of the method, how and when these assumptions can be experimentally tested, and provide general recommendations to avoid common pitfalls encountered in practice.
+
+Knowledge on R programming is not strictly required, but attendees should have basic programming skills.
+
+## References
+- [Knoblauch & Maloney (2012)](https://link.springer.com/book/10.1007/978-1-4614-4475-6). Modeling Psychophysical Data in R. Chapters 7 and 8.
+- [Aguilar & Maertens (2020)](https://jov.arvojournals.org/article.aspx?articleid=2765453). Toward reliable measurements of perceptual scales in multiple contexts. Journal of Vision.
+- [Vincent, Maertens & Aguilar (2024)](https://jov.arvojournals.org/article.aspx?articleid=2793650). What Fechner could not do: Separating perceptual encoding and decoding with difference scaling. Journal of Vision
