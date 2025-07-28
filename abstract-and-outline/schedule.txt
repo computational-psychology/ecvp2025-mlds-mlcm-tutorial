@@ -1,0 +1,46 @@
+total 2:30 minutes - 13:30 - 16:00
+
+--
+Part 1: intro about the methods
+- concept of perceptual scale, aim of the methods. 
+- classification: in 1D for MLDS, more-D: MLCM (Einordnung)
+
+Part 2: MLDS:
+- assumed observer model
+- how to design an MLDS experiment
+
+--
+Exercise 1: 
+- MLDS experiment with numerosity. Students collect their own data for 1 - 2 blocks (max 5 minutes)
+(already prepared with pyscript). 
+- Download data and load in R. Inspect data with R, head(), tail()
+
+--
+MLDS (cont.)
+- Estimation with R package, plotting, extraction of scale values, confidence intervals. Syntax
+
+--
+Exercise 2: 
+- estimate MLDS with collected data. Plot scales
+
+--
+Part 3: MLCM
+- assumed observer model. Models: independent, additive, saturated.
+- how to design an MLCM experiment. Paired comparisons. Example.
+
+--
+
+Exercise: 
+- Same demo as before, but now with numerosity and another dimension (type of marker? color?)
+All in one exercise: collect data with already prepared experiment, download data, load in R, estimate scales and plot
+
+--
+
+Part 4: Outro
+- other assumptions not explicitely stated before
+- practical recommendations. sampling.
+- 
+
+
+
+
