@@ -1,0 +1,99 @@
+---
+title: "MLDS tutorial"
+author: "Guillermo Aguilar"
+date: "2025-08-06"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Analysis of an MLDS experiment
+
+Text here explaning
+
+### Loading data
+
+
+```{r}
+df1 <- read.csv('experiment/data/GA1.csv')
+df1
+```
+More data files can be read 
+
+```{r}
+df2 <- read.csv('experiment/data/GA2.csv')
+df2
+```
+and we concatenate them
+
+```{r}
+df <- rbind(df1, df2)
+df
+```
+
+### Parse data to MLDS format
+
+We need to map the key presse to 0 or 1
+```{r}
+df$resp <- as.numeric(df$resp.keys == 'left')
+df
+```
+
+
+```{r}
+stim_vector <- c(5, 10, 15, 20, 25, 30, 40, 50, 60)
+stim_index <- seq(length(stim_vector))
+
+
+for (i in 1:length(stim_vector)) {
+  df$s1 <- replace(df$s1, df$s1==stim_vector[i], stim_index[i])
+  df$s2 <- replace(df$s2, df$s2==stim_vector[i], stim_index[i])
+  df$s3 <- replace(df$s3, df$s3==stim_vector[i], stim_index[i])
+}
+
+
+data <- df[c('resp', 's1', 's2', 's3')]
+colnames(data) <- c("Resp", "S1", "S2", "S3")
+
+
+data
+```
+
+
+```{r}
+library(MLDS)
+```
+
+We also need to remove rows with NAs
+
+```{r}
+#data <- na.omit(data)
+#data
+```
+```{r}
+data <- as.mlbs.df(data, stim_vector)
+```
+
+```{r}
+scale <- mlds(data)
+scale
+```
+
+```{r}
+par(pty="s")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
+```
+### calculating confidence intervals with bootstrap
+```{r  warning=FALSE}
+scale.boot <- boot.mlds(scale, nsim=1000)
+```
+
+```{r}
+par(pty="s")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
+
+
+
+```
