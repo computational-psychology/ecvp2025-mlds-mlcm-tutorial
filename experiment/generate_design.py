@@ -15,6 +15,9 @@ import pandas as pd
 
 Nblocks = 5
 
+n_realizations = 10
+
+
 # %% define stimulus vector
 stim_vector = np.array([5, 10, 15, 20, 25, 30, 40, 50, 60])
 print(stim_vector)
@@ -27,21 +30,27 @@ for nblock in range(1, Nblocks+1):
     design = []
     for t in triads:
         
+        
+        r1 = random.choice(range(1, n_realizations+1))
+        r2 = random.choice(range(1, n_realizations+1))
+        r3 = random.choice(range(1, n_realizations+1))
+        
+        
         if round(random.random()):
             design.append([t[0], 
                            t[1], 
                            t[2],
-                           f"s_{t[0]}_r_{nblock}.png",
-                           f"s_{t[1]}_r_{nblock}.png",
-                           f"s_{t[2]}_r_{nblock}.png",
+                           f"s_{t[0]}_r_{r1}.png",
+                           f"s_{t[1]}_r_{r2}.png",
+                           f"s_{t[2]}_r_{r3}.png",
                            ])
         else:
             design.append([t[2], 
                            t[1], 
                            t[0],
-                           f"s_{t[2]}_r_{nblock}.png",
-                           f"s_{t[1]}_r_{nblock}.png",
-                           f"s_{t[0]}_r_{nblock}.png",
+                           f"s_{t[2]}_r_{r1}.png",
+                           f"s_{t[1]}_r_{r2}.png",
+                           f"s_{t[0]}_r_{r3}.png",
                            ])
     
     

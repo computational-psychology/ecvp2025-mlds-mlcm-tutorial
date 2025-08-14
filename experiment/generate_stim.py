@@ -91,7 +91,7 @@ def create_stimulus(xy):
 
 # %%
 
-n_realizations = 5
+n_realizations = 10
 
 # minimum distance between dots. This is used to avoid overlapping
 min_d = 0.125
