@@ -31,27 +31,27 @@ for nblock in range(1, Nblocks+1):
             design.append([t[0], 
                            t[1], 
                            t[2],
-                           f"imgs/s_{t[0]}_r_{nblock}.png",
-                           f"imgs/s_{t[1]}_r_{nblock}.png",
-                           f"imgs/s_{t[2]}_r_{nblock}.png",
+                           f"s_{t[0]}_r_{nblock}.png",
+                           f"s_{t[1]}_r_{nblock}.png",
+                           f"s_{t[2]}_r_{nblock}.png",
                            ])
         else:
             design.append([t[2], 
                            t[1], 
                            t[0],
-                           f"imgs/s_{t[2]}_r_{nblock}.png",
-                           f"imgs/s_{t[1]}_r_{nblock}.png",
-                           f"imgs/s_{t[0]}_r_{nblock}.png",
+                           f"s_{t[2]}_r_{nblock}.png",
+                           f"s_{t[1]}_r_{nblock}.png",
+                           f"s_{t[0]}_r_{nblock}.png",
                            ])
     
     
-    df = pd.DataFrame(design, columns = ['s1', 's2', 's3', 'i1', 'i2', 'i3'])
+    df = pd.DataFrame(design, columns = ['s1', 's2', 's3', 'im1', 'im2', 'im3'])
     
     # Shuffle trial order
     df = df.reindex(np.random.permutation(df.index))
     df.reset_index(drop=True, inplace=True)
     df.index.name = "trial"
     
-    df.to_csv(f"design/block_{nblock}.csv")
+    df.to_csv(f"block_{nblock}.csv")
 
 # %%

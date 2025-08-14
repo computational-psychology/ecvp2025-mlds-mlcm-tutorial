@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug  8 12:14:27 2025
-
-@author: guille
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Generates stimuli for numerosity MLDS experiment
 
 ECVP 2025 tutorial
@@ -99,7 +91,7 @@ def create_stimulus(xy):
 
 # %%
 
-n_realizations = 10
+n_realizations = 5
 
 # minimum distance between dots. This is used to avoid overlapping
 min_d = 0.125
