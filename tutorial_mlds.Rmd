@@ -2,37 +2,58 @@
 title: "MLDS tutorial"
 author: "Guillermo Aguilar"
 date: "2025-08-06"
-output: html_notebook
+output:
+  html_notebook: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(MLDS)
+```
+
 ## Analysis of an MLDS experiment
 
 Text here explaning
 
-### Loading data
-
+### 1. Loading and parsing data
 
 ```{r}
-df1 <- read.csv('experiment/data/GA1.csv')
+fname1 <- 'experiment/data/GA3.csv'
+fname2 <- 'experiment/data/GA4.csv'
+fname3 <- 'experiment/data/GA5.csv'
+fname4 <- 'experiment/data/GA6.csv'
+
+df1 <- read.csv(fname1)
 df1
 ```
-More data files can be read 
-
+We keep only the relevant columns
 ```{r}
-df2 <- read.csv('experiment/data/GA2.csv')
-df2
+df1 <- df1[c('resp.keys', 's1', 's2', 's3')]
+df1
 ```
-and we concatenate them
+
+More data files can be read and we just concatenate them
 
 ```{r}
-df <- rbind(df1, df2)
+df2 <- read.csv(fname2)
+df2 <- df2[c('resp.keys', 's1', 's2', 's3')]
+
+df3 <- read.csv(fname3)
+df3 <- df3[c('resp.keys', 's1', 's2', 's3')]
+
+df4 <- read.csv(fname4)
+df4 <- df2[c('resp.keys', 's1', 's2', 's3')]
+
+df <- rbind(df1, df2, df3, df4)
 df
 ```
-
+```{r}
+df4
+```
 ### Parse data to MLDS format
 
 We need to map the key presse to 0 or 1
@@ -61,17 +82,11 @@ colnames(data) <- c("Resp", "S1", "S2", "S3")
 data
 ```
 
+### 2. Estimating perceptual scale 
 
-```{r}
-library(MLDS)
-```
+Here we use the functions from the MLDS package.
 
-We also need to remove rows with NAs
 
-```{r}
-#data <- na.omit(data)
-#data
-```
 ```{r}
 data <- as.mlbs.df(data, stim_vector)
 ```
@@ -84,16 +99,43 @@ scale
 ```{r}
 par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
+lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
 ```
-### calculating confidence intervals with bootstrap
+### 3. Confidence intervals and goodness of fit
+
+Both procedures rely on bootstrap techniques, where the observer model in MLDS is used to simulate 
+synthetic data, which is fed back into the MLDS estimation routine.
+
+
+#### Confidence intervals
+
 ```{r  warning=FALSE}
 scale.boot <- boot.mlds(scale, nsim=1000)
+scale.bt.res <- summary(scale.boot)
+
 ```
 
 ```{r}
+scale.bt.mns <- scale.bt.res[, 1] # bootstrap mean
+scale.bt.95ci <- qnorm(0.975) * scale.bt.res[, 2] # 95 CI
+
 par(pty="s")
-plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
+segments(scale$stimulus, scale.bt.mns + scale.bt.95ci, 
+         scale$stimulus, scale.bt.mns - scale.bt.95ci, )
+lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
+
+```
 
 
 
+#### Goodness of fit evaluation
+
+
+```{r  warning=FALSE}
+scale.gof <- binom.diagnostics(scale)
+```
+
+```{r  warning=FALSE}
+plot(scale.gof)
 ```
