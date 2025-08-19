@@ -23,8 +23,8 @@ Text here explaning
 
 ```{r}
 # Loading a single file
-#fname <- 'data/CH.csv'
-fname <- 'data/GA.csv'
+#fname <- 'data/mlds/CH.csv'
+fname <- 'data/mlds/GA.csv'
 
 df <- read.csv(fname)
 df
