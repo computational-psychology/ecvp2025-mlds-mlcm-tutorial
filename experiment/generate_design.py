@@ -19,7 +19,8 @@ n_realizations = 10
 
 
 # %% define stimulus vector
-stim_vector = np.array([5, 10, 15, 20, 25, 30, 40, 50, 60])
+stim_vector = np.array([5, 10, 15, 20, 25, 33, 40, 50, 60])
+#stim_vector = np.array([10, 15, 20, 25, 50, 75, 100, 150, 200])
 print(stim_vector)
 
 # %%

@@ -79,7 +79,8 @@ def create_stimulus(xy):
     # create stimulus as scatterplot
     fig, axes = plt.subplots(1, 1, figsize=(4, 4))
     fig.patch.set_facecolor((0.5, 0.5, 0.5))
-    axes.scatter(xy[:, 0], xy[:, 1], c=color, s=100)
+    #axes.scatter(xy[:, 0], xy[:, 1], c=color, s=100)
+    axes.scatter(xy[:, 0], xy[:, 1], c=color, s=80)
     axes.set_xlim([-1.1, 1.1])
     axes.set_ylim([-1.1, 1.1])
     #axes.set_facecolor((0.5, 0.5, 0.5))
@@ -94,13 +95,13 @@ def create_stimulus(xy):
 n_realizations = 10
 
 # minimum distance between dots. This is used to avoid overlapping
-min_d = 0.125
+min_d = 0.1
 color = 'k'
 
 
 # %% define stimulus vector
-#stim_vector = np.linspace(0, 2, 10).round().astype(int)
-stim_vector = np.array([5, 10, 15, 20, 25, 30, 40, 50, 60])
+stim_vector = np.array([5, 10, 15, 20, 25, 33, 40, 50, 60])
+#stim_vector = np.array([10, 15, 20, 25, 50, 75, 100, 150, 200])
 print(stim_vector)
 
 

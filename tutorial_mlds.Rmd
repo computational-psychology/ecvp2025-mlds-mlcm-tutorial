@@ -22,46 +22,51 @@ Text here explaning
 ### 1. Loading and parsing data
 
 ```{r}
-fname1 <- 'experiment/data/GA3.csv'
-fname2 <- 'experiment/data/GA4.csv'
-fname3 <- 'experiment/data/GA5.csv'
-fname4 <- 'experiment/data/GA6.csv'
+# Loading a single file
+#fname <- 'data/CH.csv'
+fname <- 'data/GA.csv'
 
-df1 <- read.csv(fname1)
-df1
-```
-We keep only the relevant columns
-```{r}
-df1 <- df1[c('resp.keys', 's1', 's2', 's3')]
-df1
-```
-
-More data files can be read and we just concatenate them
-
-```{r}
-df2 <- read.csv(fname2)
-df2 <- df2[c('resp.keys', 's1', 's2', 's3')]
-
-df3 <- read.csv(fname3)
-df3 <- df3[c('resp.keys', 's1', 's2', 's3')]
-
-df4 <- read.csv(fname4)
-df4 <- df2[c('resp.keys', 's1', 's2', 's3')]
-df <- rbind(df1, df2, df3, df4)
-
+df <- read.csv(fname)
 df
 ```
+
+We can also load the single runs and concatenate them here in R
+
+```{r}
+# Loading multiple files
+#fname1 <- 'data/GA1.csv'
+#fname2 <- 'data/GA2.csv'
+#fname3 <- 'data/GA3.csv'
+#df1 <- read.csv(fname1)
+#df2 <- read.csv(fname2)
+#df3 <- read.csv(fname3)
+#df <- rbind(df1, df2, df3)
+#df
+```
+
+We keep only the relevant columns
+```{r}
+df <- df[c('resp.keys', 's1', 's2', 's3')]
+df
+```
+
+
 ### Parse data to MLDS format
 
-We need to map the key presse to 0 or 1
+We need to map the key presses to 0 or 1
 ```{r}
 df$resp <- as.numeric(df$resp.keys == 'left')
 df
 ```
-
+and remove NaNs entered by Psychopy
 
 ```{r}
-stim_vector <- c(5, 10, 15, 20, 25, 30, 40, 50, 60)
+df <- na.omit(df)
+df
+```
+
+```{r}
+stim_vector <- c(5, 10, 15, 20, 25, 33, 40, 50, 60)
 #stim_vector <- c(10, 15, 20, 25, 50, 75, 100, 150, 200)
 stim_index <- seq(length(stim_vector))
 
@@ -99,11 +104,30 @@ par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
 ```
+```{r}
+# saving plot as PDF
+pdf(file = "figs/scale.pdf",   # The directory you want to save the file in
+    width = 4,          # The width of the plot in inches
+    height = 4)         # The height of the plot in inches
+par(pty="s")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
+lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
+dev.off()
+```
+
+```{r}
+# saving plot as PDF
+pdf(file = "figs/scale_standard.pdf",   # The directory you want to save the file in
+    width = 4,          # The width of the plot in inches
+    height = 4)         # The height of the plot in inches
+par(pty="s")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
+lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
+dev.off()
+```
+
+
 ### 3. Confidence intervals and goodness of fit
-
-Both procedures rely on bootstrap techniques, where the observer model in MLDS is used to simulate 
-synthetic data, which is fed back into the MLDS estimation routine.
-
 
 #### Confidence intervals
 
@@ -126,7 +150,19 @@ lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 ```
 
 
+```{r}
+# saving plot as PDF
+pdf(file = "figs/scale_with_CI.pdf",   # The directory you want to save the file in
+    width = 4,          # The width of the plot in inches
+    height = 4)         # The height of the plot in inches
 
+par(pty="s")
+plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
+segments(scale$stimulus, scale.bt.mns + scale.bt.95ci, 
+         scale$stimulus, scale.bt.mns - scale.bt.95ci, )
+lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
+dev.off()
+```
 #### Goodness of fit evaluation
 
 
@@ -136,4 +172,13 @@ scale.gof <- binom.diagnostics(scale)
 
 ```{r  warning=FALSE}
 plot(scale.gof)
+```
+```{r}
+# saving plot as PDF
+pdf(file = "figs/gof.pdf",   # The directory you want to save the file in
+    width = 8,          # The width of the plot in inches
+    height = 4)         # The height of the plot in inches
+
+plot(scale.gof)
+dev.off()
 ```
