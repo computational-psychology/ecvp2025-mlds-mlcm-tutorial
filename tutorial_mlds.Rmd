@@ -1,7 +1,7 @@
 ---
 title: "MLDS tutorial"
 author: "Guillermo Aguilar"
-date: "2025-08-06"
+date: "2025-08-24"
 output:
   html_notebook: default
   pdf_document: default
@@ -10,19 +10,21 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-```{r}
-library(MLDS)
-```
-
 ## Analysis of an MLDS experiment
 
 Text here explaning
+
+
+```{r}
+#install.packages('MLDS')
+library(MLDS)
+```
 
 ### 1. Loading and parsing data
 
 ```{r}
 # Loading a single file
+#fname <- 'data/mlds/JV.csv'
 #fname <- 'data/mlds/CH.csv'
 fname <- 'data/mlds/GA.csv'
 
@@ -34,9 +36,9 @@ We can also load the single runs and concatenate them here in R
 
 ```{r}
 # Loading multiple files
-#fname1 <- 'data/GA1.csv'
-#fname2 <- 'data/GA2.csv'
-#fname3 <- 'data/GA3.csv'
+#fname1 <- 'data/mlds/GA1.csv'
+#fname2 <- 'data/mlds/GA2.csv'
+#fname3 <- 'data/mlds/GA3.csv'
 #df1 <- read.csv(fname1)
 #df2 <- read.csv(fname2)
 #df3 <- read.csv(fname3)
@@ -134,17 +136,25 @@ dev.off()
 ```{r  warning=FALSE}
 scale.boot <- boot.mlds(scale, nsim=1000)
 scale.bt.res <- summary(scale.boot)
-
 ```
 
 ```{r}
-scale.bt.mns <- scale.bt.res[, 1] # bootstrap mean
-scale.bt.95ci <- qnorm(0.975) * scale.bt.res[, 2] # 95 CI
+mns <- scale.bt.res[, 1] # bootstrap mean
+ci <- qnorm(0.975) * scale.bt.res[, 2] # 95 CI, assuming normal distribution of bootstrap samples
 
+# calculating low and high bounds of confidence interval manually using quantiles,
+# this procedure does not assume normal distribution of bootstrap samples
+samples <- scale.boot$boot.samp
+low <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.025))
+high <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.975))
+```
+
+We now plot the scale with CIs
+
+```{r}
 par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
-segments(scale$stimulus, scale.bt.mns + scale.bt.95ci, 
-         scale$stimulus, scale.bt.mns - scale.bt.95ci, )
+segments(scale$stimulus, low, scale$stimulus, high)
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 
 ```
@@ -158,8 +168,7 @@ pdf(file = "figs/scale_with_CI.pdf",   # The directory you want to save the file
 
 par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
-segments(scale$stimulus, scale.bt.mns + scale.bt.95ci, 
-         scale$stimulus, scale.bt.mns - scale.bt.95ci, )
+segments(scale$stimulus, low, scale$stimulus, high)
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 dev.off()
 ```
