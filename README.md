@@ -21,8 +21,10 @@ Knowledge on R programming is not strictly required, but attendees should have b
 
 ### Rmarkdown scripts
 
-- [MLDS analysis](tutorial_mlds.Rmd)
-- [MLCM analysis](tutorial_mlcm.Rmd)
+Open these Rmarkdown files with Rstudio.
+
+- for MLDS analysis: *tutorial_mlds.Rmd* (see [HTML rendered version here](tutorial_mlds.nb.html))
+- for MLCM analysis: *tutorial_mlcm.Rmd* (see [HTML rendered version here](tutorial_mlcm.nb.html))
 
 
 ## References
