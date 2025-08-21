@@ -8,12 +8,21 @@ Maximum Likelihood Difference Scaling (MLDS) and Maximum Likelihood Conjoint Mea
 
 Knowledge on R programming is not strictly required, but attendees should have basic programming skills.
 
-## Online experiments
+## Material used in this workshop
+
+### [Slides](slides_tutorial.pdf)
+
+
+### Online experiments
 
 - [MLDS experiment on perceived numerosity](https://kutt.it/mlds-exp)
 
 - [MLCM experiment for White's illusion](https://kutt.it/mlcm-exp)
 
+### Rmarkdown scripts
+
+- [MLDS analysis](tutorial_mlds.Rmd)
+- [MLCM analysis](tutorial_mlcm.Rmd)
 
 
 ## References
