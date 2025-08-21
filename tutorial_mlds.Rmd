@@ -3,8 +3,10 @@ title: "MLDS tutorial"
 author: "Guillermo Aguilar"
 date: "2025-08-24"
 output:
-  html_notebook: default
   pdf_document: default
+  html_document:
+    df_print: paged
+  html_notebook: default
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +26,7 @@ library(MLDS)
 
 ```{r}
 # Loading a single file
-#fname <- 'data/mlds/JV.csv'
+#fname <- 'data/mlds/JXV.csv'
 #fname <- 'data/mlds/CH.csv'
 fname <- 'data/mlds/GA.csv'
 
@@ -106,7 +108,7 @@ par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
 ```
-```{r}
+```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/scale.pdf",   # The directory you want to save the file in
     width = 4,          # The width of the plot in inches
@@ -117,7 +119,7 @@ lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type
 dev.off()
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/scale_standard.pdf",   # The directory you want to save the file in
     width = 4,          # The width of the plot in inches
@@ -160,7 +162,7 @@ lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/scale_with_CI.pdf",   # The directory you want to save the file in
     width = 4,          # The width of the plot in inches
@@ -182,7 +184,7 @@ scale.gof <- binom.diagnostics(scale)
 ```{r  warning=FALSE}
 plot(scale.gof)
 ```
-```{r}
+```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/gof.pdf",   # The directory you want to save the file in
     width = 8,          # The width of the plot in inches
