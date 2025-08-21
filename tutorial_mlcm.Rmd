@@ -1,0 +1,242 @@
+---
+title: "Analysis of an MLCM experiment"
+author: "Guillermo Aguilar"
+date: "2025-08-24"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Text here explaning
+```{r}
+#install.packages('MLCM')
+library(MLCM)
+```
+
+
+## 1. Loading and parsing data
+
+We first load the data. The following file contains data from the MLCM experiment
+run six times, for a total of 572 trials.
+I added it here already aggregated so that you don't have to run so many trials on your own.
+```{r}
+# Loading a single file
+fname <- 'data/mlcm/GA.csv'
+
+df <- read.csv(fname)
+df
+```
+
+We can also load the single runs and concatenate them here. Here the code is commented out
+as the input file is already aggregated. But if you can use it to aggregate your own data.
+
+```{r}
+# Loading multiple files
+# fname1 <- 'data/mlcm/GA1.csv'
+# fname2 <- 'data/mlcm/GA2.csv'
+# fname3 <- 'data/mlcm/GA3.csv'
+# fname4 <- 'data/mlcm/GA4.csv'
+# fname5 <- 'data/mlcm/GA5.csv'
+# fname6 <- 'data/mlcm/GA6.csv'
+# df1 <- read.csv(fname1)
+# df2 <- read.csv(fname2)
+# df3 <- read.csv(fname3)
+# df4 <- read.csv(fname3)
+# df5 <- read.csv(fname5)
+# df6 <- read.csv(fname6)
+
+# df <- rbind(df1, df2, df3, df4, df5, df6)
+# df
+```
+
+We keep only the relevant columns
+```{r}
+df <- df[c('resp.keys', 'lum1', 'lum2', 'c1', 'c2')]
+df
+```
+
+### Parse data to MLCM format
+
+Now we need to map the key presses to 0 and 1's. 
+```{r}
+df$resp <- as.numeric(df$resp.keys == 'left')
+df
+```
+and remove NaNs, which are automatically entered by Psychopy
+
+```{r}
+df <- na.omit(df)
+df
+```
+Then we need to put the data in the format that the MLCM package likes.
+Each row is a trial, and we will have 5 columns:
+
+- Resp: containing the binary response (0 or 1)
+- L1, L2: containing the stimulus *indices* along the first stimulus dimension, 
+in this case luminance.
+- C1, C2: containing the stimulus *indices* along the second stimulus dimension, 
+in this case the "context" (on a black or white bar)
+
+The following code rearranges the data to that format, saving it in variable `data`
+
+```{r}
+lum_vector <- c(0.25, 0.33, 0.42, 0.5, 0.58, 0.67,0.75)
+
+lum_index <- seq(length(lum_vector))
+
+for (i in 1:length(lum_vector)) {
+  df$lum1 <- replace(df$lum1, df$lum1==lum_vector[i], lum_index[i])
+  df$lum2 <- replace(df$lum2, df$lum2==lum_vector[i], lum_index[i])
+}
+
+# we will map context 0 to index 2, and context 1 to index 1. 
+# this last one doesn't change, so we only need to change from 0 --> 2
+df$c1 <- replace(df$c1, df$c1==0, 2)
+df$c2 <- replace(df$c2, df$c2==0, 2)
+
+data <- df[c('resp', 'lum1', 'lum2', 'c1', 'c2')]
+
+# renaming columns
+colnames(data) <- c("Resp", "L1", "L2", "C1", "C2")
+
+data
+```
+
+## 2. Estimating perceptual scales
+
+Scales can be fitted using one of three different decisions models in MLCM. The
+most general one is the 'full' model, in which  MLCM finds a scale value to 
+*each* stimulus.
+
+Then there is the 'additive' model, which assumes that the effect of the stimulus 
+dimension is additive. It finds a scale for one dimension (luminance), and for 
+the other dimension (context) only finds an additive factor.
+
+Finally the most constrained model is the 'independent' model, where it is assumed 
+that only one stimulus dimension determines appearance.
+
+Here we fit the three models, then compared them to determine which one is the
+most appropriate one, and then plot the scales for that model only. Finally we 
+calculate confidence intervals for them.
+
+### Estimating the 'full' model
+
+```{r}
+# full model
+scales_full <- mlcm(data, model='full')
+scales_full
+```
+
+### Fitting the 'additive ' and 'independent' model
+
+```{r}
+# additive
+scales_add <- mlcm(data, model='add')
+scales_add
+```
+
+```{r}
+# independent
+scales_ind <- mlcm(data, model='ind', whichdim = 1)
+scales_ind
+```
+
+### Comparing models 
+
+The likelihood ratio test is used for model comparison. For this statistical test
+the statistic follows the Chi-squared distribution.
+
+```{r}
+# comparing models
+anova(scales_ind, scales_add, scales_full, test = "Chisq")
+```
+
+The result is that the additive model is signifficantly better than the full model 
+in explaining the data 
+(see asterisks next to p-value). 
+
+```{r}
+modeltype = 'add'
+```
+
+## 3. Confidence intervals and goodness of fit
+
+### Calculating confidence intervals
+
+```{r  warning=FALSE}
+if (modeltype=='add'){
+  scales <- scales_add
+  
+} else if(modeltype=='full'){
+  scales <- scales_full
+}
+
+scalesboot <- boot.mlcm(scales, nsim=1000)
+
+## here  we manually calculate the percentile confidence intervals from the bootstrap samples
+samples <- scalesboot$boot.samp
+
+## if the model is additive, we need to rearrange the bootstrap samples a bit to get a full matrix of samples
+if (modeltype=='add'){
+  additiveshift <- samples[nrow(samples),]
+  
+  context1 <- samples[1:nrow(samples)-1,]
+  context2 <- rbind(rep(0, ncol(samples)), samples[1:nrow(samples)-1,]) + additiveshift
+  
+  samples <- rbind(context1, context2)
+}
+
+mns <- apply(samples, 1, mean)  # bootstrap mean
+#ci95 <- qnorm(0.975) * apply(samples, 1, sd) 
+
+# low and high bounds of confidence interval
+low <- apply(samples, 1, quantile, probs = 0.025)
+high <- apply(samples, 1, quantile, probs = 0.975)
+
+```
+
+### Plotting scales with CIs
+
+```{r}
+par(pty="s")
+# plot one scale for first context
+plot(lum_vector, scales$pscale[,1], 
+     xlab = "Luminance [relative]", ylab = "Perceived brightness", 
+     col="darkgray",
+     ylim=c(0, max(mns)*1.2), 
+     #xlim=c(0, 1),
+     )
+
+# and for the second context
+if (modeltype=='add'){
+  # manually add the additive factor to the first scale
+  points(lum_vector, scales$pscale[,1] + scales$pscale[2,2] , col="black")
+} else {
+  if (modeltype=='full'){
+    # not necessary to add the factor manually
+    points(lum_vector,scales$pscale[,2], col="black")
+  }
+}
+
+# CIs
+ns <- length(lum_vector)
+segments(lum_vector[2:ns], low[1:ns-1], lum_vector[2:ns], high[1:ns-1], col="darkgray")
+segments(lum_vector[1:ns], low[(ns+1):(2*ns)-1], lum_vector[1:ns], high[(ns+1):(2*ns)-1], col="black")
+```
+### Goodness of fit evaluation
+
+The evaluation follows the same logic as in MLDS. Check out the MLDS tutorial (tutorial_mlds.Rmd) 
+and the tutorial slides for details.
+
+```{r  warning=FALSE}
+scales.gof <- binom.diagnostics(scales, nsim=1000)
+plot(scales.gof)
+```
+
+```{r}
+print(scales.gof$p)
+```
