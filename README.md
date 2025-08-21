@@ -8,6 +8,14 @@ Maximum Likelihood Difference Scaling (MLDS) and Maximum Likelihood Conjoint Mea
 
 Knowledge on R programming is not strictly required, but attendees should have basic programming skills.
 
+## Online experiments
+
+- [MLDS experiment on perceived numerosity](https://kutt.it/mlds-exp)
+
+- [MLCM experiment for White's illusion](https://kutt.it/mlcm-exp)
+
+
+
 ## References
 - [Knoblauch & Maloney (2012)](https://link.springer.com/book/10.1007/978-1-4614-4475-6). Modeling Psychophysical Data in R. Chapters 7 and 8.
 - [Maloney & Yang (2003)](https://jov.arvojournals.org/article.aspx?articleid=2192635). Maximum likelihood difference scaling. JoV.
