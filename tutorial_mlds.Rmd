@@ -1,5 +1,5 @@
 ---
-title: "MLDS tutorial"
+title: "Analysis of an MLDS experiment"
 author: "Guillermo Aguilar"
 date: "2025-08-24"
 output:
@@ -12,10 +12,9 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Analysis of an MLDS experiment
 
 This notebook shows how to analyze data obtained in an MLDS experiment using
-the R package `MLDS`. The notebook is divided into three parts:
+the R package `MLDS`. The notebook is divided into four parts:
 
 1. Loading and parsing data
 2. Estimating the perceptual scale

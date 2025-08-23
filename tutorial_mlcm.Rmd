@@ -3,25 +3,50 @@ title: "Analysis of an MLCM experiment"
 author: "Guillermo Aguilar"
 date: "2025-08-24"
 output:
-  html_notebook: default
+  html_document:
+    df_print: paged
   pdf_document: default
+  html_notebook: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Text here explaning
+This notebook shows how to analyze data obtained in an MLCM experiment using
+the R package `MLCM`. It is similar in structure as the accompaning notebook
+on MLDS. The notebook is divided into four parts:
+
+1. Loading and parsing data
+2. Estimating the perceptual scale
+3. Calculating confidence intervals
+4. Evaluating goodness of fit.
+
+
+To start, we need to have the `MLDS` packaged installed and loading in our R session.
 ```{r}
+# uncomment to install package if you don't have it.
+# you only need to do this once.
+
 #install.packages('MLCM')
+
+# loading package into the session
 library(MLCM)
 ```
 
+### 1. Loading and parsing data
 
-## 1. Loading and parsing data
+#### Loading data
 
-We first load the data. The following file contains data from the MLCM experiment
-run six times, for a total of 572 trials.
+The first step in the analysis is to load the data from the experiment, and 
+parse them to the format the functions in the `MLDS` package understands. 
+
+The following code loads a CSV file containing data from an MLCM experiment 
+on brightness perception of the White's illusion. 
+This was an experiment programmed with Psychopy and run online with Pavlovia.
+
+The following file contains data of the MLCM experiment run six times, 
+for a total of 572 trials.
 I added it here already aggregated so that you don't have to run so many trials on your own.
 ```{r}
 # Loading a single file
@@ -31,42 +56,30 @@ df <- read.csv(fname)
 df
 ```
 
-We can also load the single runs and concatenate them here. Here the code is commented out
-as the input file is already aggregated. But if you can use it to aggregate your own data.
 
-```{r}
-# Loading multiple files
-# fname1 <- 'data/mlcm/GA1.csv'
-# fname2 <- 'data/mlcm/GA2.csv'
-# fname3 <- 'data/mlcm/GA3.csv'
-# fname4 <- 'data/mlcm/GA4.csv'
-# fname5 <- 'data/mlcm/GA5.csv'
-# fname6 <- 'data/mlcm/GA6.csv'
-# df1 <- read.csv(fname1)
-# df2 <- read.csv(fname2)
-# df3 <- read.csv(fname3)
-# df4 <- read.csv(fname3)
-# df5 <- read.csv(fname5)
-# df6 <- read.csv(fname6)
 
-# df <- rbind(df1, df2, df3, df4, df5, df6)
-# df
-```
+Now we only keep the columns relevant for our analysis. These are:
 
-We keep only the relevant columns
+- lum1, lum2: the luminance values presented in each trial, for the left and right stimuli
+- the "context" on which each stimulus was presented, 0 for on a black bar, 1 for 
+  on a white bar.
+- resp.keys: what button the observer pressed.
+
 ```{r}
 df <- df[c('resp.keys', 'lum1', 'lum2', 'c1', 'c2')]
 df
 ```
 
-### Parse data to MLCM format
+#### Parsing data to format needed by MLCM
 
-Now we need to map the key presses to 0 and 1's. 
+We need to map the key presses to 0's or 1's. We do this with the following call
+and save the responses in a new column called `resp`.
+
 ```{r}
 df$resp <- as.numeric(df$resp.keys == 'left')
 df
 ```
-and remove NaNs, which are automatically entered by Psychopy
+Now we remove NaNs entered automatically by Psychopy
 
 ```{r}
 df <- na.omit(df)
@@ -106,7 +119,10 @@ colnames(data) <- c("Resp", "L1", "L2", "C1", "C2")
 data
 ```
 
-## 2. Estimating perceptual scales
+This last data frame, `data`, is in the correct format ready for MLDS.
+
+
+### 2. Estimating the perceptual scales
 
 Scales can be fitted using one of three different decisions models in MLCM. The
 most general one is the 'full' model, in which  MLCM finds a scale value to 
@@ -123,7 +139,7 @@ Here we fit the three models, then compared them to determine which one is the
 most appropriate one, and then plot the scales for that model only. Finally we 
 calculate confidence intervals for them.
 
-### Estimating the 'full' model
+#### 'Full' model
 
 ```{r}
 # full model
@@ -131,7 +147,7 @@ scales_full <- mlcm(data, model='full')
 scales_full
 ```
 
-### Fitting the 'additive ' and 'independent' model
+#### 'Additive ' and 'independent' model
 
 ```{r}
 # additive
@@ -145,7 +161,7 @@ scales_ind <- mlcm(data, model='ind', whichdim = 1)
 scales_ind
 ```
 
-### Comparing models 
+#### Comparing models 
 
 The likelihood ratio test is used for model comparison. For this statistical test
 the statistic follows the Chi-squared distribution.
@@ -155,19 +171,19 @@ the statistic follows the Chi-squared distribution.
 anova(scales_ind, scales_add, scales_full, test = "Chisq")
 ```
 
-The result is that the additive model is signifficantly better than the full model 
-in explaining the data 
-(see asterisks next to p-value). 
+For these data the model comparison tells us that the additive model 
+is signifficantly better than the full model in explaining the data 
+(see asterisks next to p-value). For the rest of the notebook we then only
+keep analysing the additive model.
 
 ```{r}
-modeltype = 'add'
+# change here to 'full' if in the comparison above the additive model is not 
+# sig. better than the full
+modeltype = 'add' # 'full'
 ```
 
-## 3. Confidence intervals and goodness of fit
 
-### Calculating confidence intervals
-
-```{r  warning=FALSE}
+```{r}
 if (modeltype=='add'){
   scales <- scales_add
   
@@ -175,6 +191,14 @@ if (modeltype=='add'){
   scales <- scales_full
 }
 
+```
+
+### 3. Calculating confidence intervals
+
+Calculating confidence intervals follows the same logic as for MLDS. Refer to
+the MLDS tutorial for details. 
+
+```{r  warning=FALSE}
 scalesboot <- boot.mlcm(scales, nsim=1000)
 
 ## here  we manually calculate the percentile confidence intervals from the bootstrap samples
@@ -196,7 +220,6 @@ mns <- apply(samples, 1, mean)  # bootstrap mean
 # low and high bounds of confidence interval
 low <- apply(samples, 1, quantile, probs = 0.025)
 high <- apply(samples, 1, quantile, probs = 0.975)
-
 ```
 
 ### Plotting scales with CIs
@@ -227,7 +250,8 @@ ns <- length(lum_vector)
 segments(lum_vector[2:ns], low[1:ns-1], lum_vector[2:ns], high[1:ns-1], col="darkgray")
 segments(lum_vector[1:ns], low[(ns+1):(2*ns)-1], lum_vector[1:ns], high[(ns+1):(2*ns)-1], col="black")
 ```
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/scale_mlcm_with_CI.pdf",   # The directory you want to save the file in
     width = 4,          # The width of the plot in inches
@@ -261,10 +285,10 @@ dev.off()
 ```
 
 
-### Goodness of fit evaluation
+### 4. Evaluating goodness of fit
 
-The evaluation follows the same logic as in MLDS. Check out the MLDS tutorial (tutorial_mlds.Rmd) 
-and the tutorial slides for details.
+The type of evaluation is identical as in MLDS. Check out the MLDS tutorial (tutorial_mlds.Rmd) 
+and the slides for details.
 
 ```{r  warning=FALSE}
 scales.gof <- binom.diagnostics(scales, nsim=1000)
