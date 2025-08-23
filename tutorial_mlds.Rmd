@@ -3,10 +3,10 @@ title: "MLDS tutorial"
 author: "Guillermo Aguilar"
 date: "2025-08-24"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
   html_notebook: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,30 +14,54 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Analysis of an MLDS experiment
 
-Text here explaning
+This notebook shows how to analyze data obtained in an MLDS experiment using
+the R package `MLDS`. The notebook is divided into three parts:
+
+1. Loading and parsing data
+2. Estimating the perceptual scale
+3. Calculating confidence intervals
+4. Evaluating goodness of fit.
 
 
+To start, we need to have the `MLDS` packaged installed and loading in our R session.
 ```{r}
+# uncomment to install package if you don't have it.
+# you only need to do this once.
+
 #install.packages('MLDS')
+
+# loading package into the session
 library(MLDS)
 ```
 
 ### 1. Loading and parsing data
 
+#### Loading data
+
+The first step in the analysis is to load the data from the experiment, and 
+parse them to the format the functions in the `MLDS` package understands. 
+
+The following code loads a CSV file containing data from an MLDS experiment 
+on perceived numerosity. This was an experiment programmed with Psychopy
+and run online with Pavlovia.
+
 ```{r}
-# Loading a single file
+# Loading a file from an observer
+# Here we have three different observers, uncomment or edit as needed.
+fname <- 'data/mlds/GA.csv'
 #fname <- 'data/mlds/JXV.csv'
 #fname <- 'data/mlds/CH.csv'
-fname <- 'data/mlds/GA.csv'
 
 df <- read.csv(fname)
 df
 ```
+As you can see the CSV file contains many columns that Psychopy automatically saves. 
+Not all columns are relevant, we will filter them later. 
 
 We can also load the single runs and concatenate them here in R
 
 ```{r}
-# Loading multiple files
+# Loading multiple files, uncomment to try it out. Edit with your files as needed.
 #fname1 <- 'data/mlds/GA1.csv'
 #fname2 <- 'data/mlds/GA2.csv'
 #fname3 <- 'data/mlds/GA3.csv'
@@ -48,32 +72,40 @@ We can also load the single runs and concatenate them here in R
 #df
 ```
 
-We keep only the relevant columns
+Now we only keep the columns relevant for our analysis. These are:
+
+- s1, s2, s3: the stimulus values presented in each trial
+- resp.keys: what button the observer pressed.
+
 ```{r}
 df <- df[c('resp.keys', 's1', 's2', 's3')]
 df
 ```
 
+#### Parsing data to format needed by MLDS
 
-### Parse data to MLDS format
+We need to map the key presses to 0's or 1's. We do this with the following call
+and save the responses in a new column called `resp`.
 
-We need to map the key presses to 0 or 1
 ```{r}
 df$resp <- as.numeric(df$resp.keys == 'left')
 df
 ```
-and remove NaNs entered by Psychopy
+Now we remove NaNs entered automatically by Psychopy
 
 ```{r}
 df <- na.omit(df)
 df
 ```
+The input to MLDS is a data frame that contains the *indices* of the presented
+stimuli, not the stimulus values themselves. In the following code we do this 
+by explicitly set a stimulus vector, and we replace the values with its 
+corresponding index on that vector.
 
 ```{r}
+# vector of stimulus values
 stim_vector <- c(5, 10, 15, 20, 25, 33, 40, 50, 60)
-#stim_vector <- c(10, 15, 20, 25, 50, 75, 100, 150, 200)
 stim_index <- seq(length(stim_vector))
-
 
 for (i in 1:length(stim_vector)) {
   df$s1 <- replace(df$s1, df$s1==stim_vector[i], stim_index[i])
@@ -81,33 +113,63 @@ for (i in 1:length(stim_vector)) {
   df$s3 <- replace(df$s3, df$s3==stim_vector[i], stim_index[i])
 }
 
-
 data <- df[c('resp', 's1', 's2', 's3')]
-colnames(data) <- c("Resp", "S1", "S2", "S3")
 
+# we rename the columns
+colnames(data) <- c("Resp", "S1", "S2", "S3")
 
 data
 ```
 
-### 2. Estimating perceptual scale 
+This last data frame, `data`, is in the correct format ready for MLDS.
 
-Here we use the functions from the MLDS package.
 
+### 2. Estimating the perceptual scale 
+
+We now estimate the scale by calling the functions from the `MLDS` package.
+We give the data to the function `as.mlbs.df` to transform the data frame
+into one that `MLDS` takes as input. We also pass the stimulus vector so that 
+the functions later will know to which values each index corresponds.
 
 ```{r}
 data <- as.mlbs.df(data, stim_vector)
 ```
 
+And now we call the main estimation function, `mlds()`, save the result in
+a variable and we print the output.
 ```{r}
 scale <- mlds(data)
 scale
 ```
 
+The variable `scale` contains the estimated scale, but also all the data and
+specifics of the estimation procedure using the GLM. The stimulus and scale vectors 
+can be accessed with
+
+```{r}
+print(scale$stimulus)
+```
+
+and 
+
+```{r}
+print(scale$pscale)
+```
+
+The package also comes with a plotting routine for the scale output, as shown in the 
+following code.
 ```{r}
 par(pty="s")
 plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
 ```
+
+*Disclaimer: The notebook uses only functions from R-base and does not
+use functions from other packages. This is on purpose, to keep the code flexible and 
+compatible with most users. Better plots can be created witht `ggplot`, but this
+is left here to the user*
+
+
 ```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/scale.pdf",   # The directory you want to save the file in
@@ -130,20 +192,27 @@ lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 dev.off()
 ```
 
+### 3. Calculating confidence intervals
 
-### 3. Confidence intervals and goodness of fit
+In MLDS confidence intervals are calculated via bootstrap. The logic is the following.
+First, the estimated parameters for the scale are used (via the GLM) to get
+the choice probability for each triad. Then these probabilities are used to
+generate simulated data, which is then fed into the estimation routine to get
+a bootstrapped sample of the parameters. The process is repeated many times 
+(here 1000 times), to get a distribution of boostrapped parameters. 
+From the distribution confidence intervals can be calculated.
 
-#### Confidence intervals
+The bootstrap simulation is already implemented in the package in function `boot.mlds`
 
 ```{r  warning=FALSE}
 scale.boot <- boot.mlds(scale, nsim=1000)
-scale.bt.res <- summary(scale.boot)
 ```
 
-```{r}
-mns <- scale.bt.res[, 1] # bootstrap mean
-ci <- qnorm(0.975) * scale.bt.res[, 2] # 95 CI, assuming normal distribution of bootstrap samples
+The returned object `scale.boot` contains all the bootstrapped parameter samples.
+From them we (manually) calculate the bounds of the confidence intervals, as 
+follows
 
+```{r}
 # calculating low and high bounds of confidence interval manually using quantiles,
 # this procedure does not assume normal distribution of bootstrap samples
 samples <- scale.boot$boot.samp
@@ -151,7 +220,7 @@ low <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.025))
 high <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.975))
 ```
 
-We now plot the scale with CIs
+`low` and `high`contains the CI bounds. We now can plot the scale with CIs
 
 ```{r}
 par(pty="s")
@@ -174,16 +243,60 @@ segments(scale$stimulus, low, scale$stimulus, high)
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 dev.off()
 ```
-#### Goodness of fit evaluation
 
 
+### 4. Evaluating goodness of fit
+
+Similar as for CIs, to evaluate goodness of fit MLDS also relies on simulation. 
+Now instead of analysing the bootstrapped parameter samples, we evaluate the 
+*deviance* on each simulation run. *Deviance* captures the deviation between 
+model and data. It is the analogous to the sum of squared errors (SSE) in
+linear regression. The deviance is calculated for each datapoint as a 
+*deviance residual*, similar to the residuals in linear regression.
+
+The simulation and deviance calculation is done with function `binom.diagnostics`
 ```{r  warning=FALSE}
 scale.gof <- binom.diagnostics(scale)
 ```
 
+There are two checks on the deviance that the MLDS package considers.
+The first check is on the cumulative density function of the deviance residuals
+(left panel). Here the CDF is compared with the 95% envelope produced by the 
+simulated data. An appropriate model should have all datapoints inside the envelope.
+
 ```{r  warning=FALSE}
 plot(scale.gof)
 ```
+
+The second check considers the order on the deviance residuals. In specific,
+it sorts the deviance residuals by the independent variable, and counts how
+many residuals have consecutively the same sign. This is the `number of runs` (
+(vertical line on the histogram below, right panel).
+The same is done for each simulated run, to obtain a distribution of runs which 
+is visualized as a histogram.
+
+For an appropriate goodness of fit, the number of runs from the data (vertical line)
+should not be signifficantly different than the distribution. The `binom.diagnostics`
+function also calculates a p-value for this comparison, this should *not* be 
+significant (p>0.05).
+
+
+```{r}
+print(scale.gof$p)
+```
+
+Finding a "bad" goodness of fit indicates that the model assumptions behind MLDS 
+are somehow violated. For example, it can indicate that the observer's decision
+rule is not what MLDS assumes (a double differencing rule). Instead, the observer
+may  be using another strategy to perform the task. 
+
+Another possibility is that the stimuli vary along more than one perceptual 
+dimension. In this case judgments will be inconsistent with the decision model, 
+if the observer considers a similarity distance in perceptual space, and that 
+will produce a violation in the model assumptions.
+Experiments may consider alternative models to investifate these cases further.
+
+
 ```{r eval=FALSE, include=FALSE}
 # saving plot as PDF
 pdf(file = "figs/gof.pdf",   # The directory you want to save the file in
