@@ -19,12 +19,18 @@ Knowledge on R programming is not strictly required, but attendees should have b
 
 - [MLCM experiment for White's illusion](https://kutt.it/mlcm-exp)
 
-### Rmarkdown scripts
+### R notebooks
 
-Open these Rmarkdown files with Rstudio.
+You can open and edit the notebook files to run the analysis locally.
 
-- for MLDS analysis: *tutorial_mlds.Rmd* [here for the rendered HTML version](https://computational-psychology.github.io/ecvp2025-mlds-mlcm-tutorial/tutorial_mlds.html)
-- for MLCM analysis: *tutorial_mlcm.Rmd* [here for the rendered HTML version](https://computational-psychology.github.io/ecvp2025-mlds-mlcm-tutorial/tutorial_mlcm.html)
+- *tutorial_mlds.Rmd* for MLDS analysis
+- *tutorial_mlcm.Rmd* for MLCM analysis
+
+Alternatively you can see the rendered versions of these notebooks,
+run with the default data:
+
+- [rendered version of *tutorial_mlds.Rmd*](https://computational-psychology.github.io/ecvp2025-mlds-mlcm-tutorial/tutorial_mlds.html)
+- [rendered version of *tutorial_mlcm.Rmd*](https://computational-psychology.github.io/ecvp2025-mlds-mlcm-tutorial/tutorial_mlcm.html)
 
 
 ## References
