@@ -251,40 +251,6 @@ segments(lum_vector[2:ns], low[1:ns-1], lum_vector[2:ns], high[1:ns-1], col="dar
 segments(lum_vector[1:ns], low[(ns+1):(2*ns)-1], lum_vector[1:ns], high[(ns+1):(2*ns)-1], col="black")
 ```
 
-```{r eval=FALSE, include=FALSE}
-# saving plot as PDF
-pdf(file = "figs/scale_mlcm_with_CI.pdf",   # The directory you want to save the file in
-    width = 4,          # The width of the plot in inches
-    height = 4)         # The height of the plot in inches
-
-par(pty="s")
-# plot one scale for first context
-plot(lum_vector, scales$pscale[,1], 
-     xlab = "Luminance [relative]", ylab = "Perceived brightness", 
-     col="darkgray",
-     ylim=c(0, max(mns)*1.2), 
-     #xlim=c(0, 1),
-     )
-
-# and for the second context
-if (modeltype=='add'){
-  # manually add the additive factor to the first scale
-  points(lum_vector, scales$pscale[,1] + scales$pscale[2,2] , col="black")
-} else {
-  if (modeltype=='full'){
-    # not necessary to add the factor manually
-    points(lum_vector,scales$pscale[,2], col="black")
-  }
-}
-
-# CIs
-ns <- length(lum_vector)
-segments(lum_vector[2:ns], low[1:ns-1], lum_vector[2:ns], high[1:ns-1], col="darkgray")
-segments(lum_vector[1:ns], low[(ns+1):(2*ns)-1], lum_vector[1:ns], high[(ns+1):(2*ns)-1], col="black")
-dev.off()
-```
-
-
 ### 4. Evaluating goodness of fit
 
 The type of evaluation is identical as in MLDS. Check out the MLDS tutorial (tutorial_mlds.Rmd) 

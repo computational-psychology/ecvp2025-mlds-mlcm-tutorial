@@ -50,6 +50,7 @@ and run online with Pavlovia.
 fname <- 'data/mlds/GA.csv'
 #fname <- 'data/mlds/JXV.csv'
 #fname <- 'data/mlds/CH.csv'
+#fname <- 'data/mlds/XX.csv' ## your file here
 
 df <- read.csv(fname)
 df
@@ -169,28 +170,6 @@ compatible with most users. Better plots can be created witht `ggplot`, but this
 is left here to the user*
 
 
-```{r eval=FALSE, include=FALSE}
-# saving plot as PDF
-pdf(file = "figs/scale.pdf",   # The directory you want to save the file in
-    width = 4,          # The width of the plot in inches
-    height = 4)         # The height of the plot in inches
-par(pty="s")
-plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity")
-lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, max(scale$pscale)), type = "l", lty = 1)
-dev.off()
-```
-
-```{r eval=FALSE, include=FALSE}
-# saving plot as PDF
-pdf(file = "figs/scale_standard.pdf",   # The directory you want to save the file in
-    width = 4,          # The width of the plot in inches
-    height = 4)         # The height of the plot in inches
-par(pty="s")
-plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
-lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
-dev.off()
-```
-
 ### 3. Calculating confidence intervals
 
 In MLDS confidence intervals are calculated via bootstrap. The logic is the following.
@@ -219,7 +198,7 @@ low <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.025))
 high <- c(0, apply(samples[1:(nrow(samples)-1),], 1, quantile, probs = 0.975))
 ```
 
-`low` and `high`contains the CI bounds. We now can plot the scale with CIs
+The variables `low` and `high`contains the CI bounds. We now can plot the scale with CIs
 
 ```{r}
 par(pty="s")
@@ -228,21 +207,6 @@ segments(scale$stimulus, low, scale$stimulus, high)
 lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
 
 ```
-
-
-```{r eval=FALSE, include=FALSE}
-# saving plot as PDF
-pdf(file = "figs/scale_with_CI.pdf",   # The directory you want to save the file in
-    width = 4,          # The width of the plot in inches
-    height = 4)         # The height of the plot in inches
-
-par(pty="s")
-plot(scale, xlab = "Number of dots", ylab = "Perceived numerosity", standard.scale = TRUE)
-segments(scale$stimulus, low, scale$stimulus, high)
-lines(c(min(scale$stimulus), max(scale$stimulus)), c(0, 1), type = "l", lty = 1)
-dev.off()
-```
-
 
 ### 4. Evaluating goodness of fit
 
@@ -254,6 +218,7 @@ linear regression. The deviance is calculated for each datapoint as a
 *deviance residual*, similar to the residuals in linear regression.
 
 The simulation and deviance calculation is done with function `binom.diagnostics`
+
 ```{r  warning=FALSE}
 scale.gof <- binom.diagnostics(scale)
 ```
@@ -293,15 +258,4 @@ Another possibility is that the stimuli vary along more than one perceptual
 dimension. In this case judgments will be inconsistent with the decision model, 
 if the observer considers a similarity distance in perceptual space, and that 
 will produce a violation in the model assumptions.
-Experiments may consider alternative models to investifate these cases further.
-
-
-```{r eval=FALSE, include=FALSE}
-# saving plot as PDF
-pdf(file = "figs/gof.pdf",   # The directory you want to save the file in
-    width = 8,          # The width of the plot in inches
-    height = 4)         # The height of the plot in inches
-
-plot(scale.gof)
-dev.off()
-```
+Experimenters may consider alternative models to investigate these cases further.
